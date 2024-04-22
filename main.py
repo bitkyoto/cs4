@@ -240,18 +240,20 @@ class Ui_MainWindow(object):
 
 
     def load_tree_structure(self, startroot_path, tree):
-        #TODO: Сделать создание дерева по конфиг-файлу, а не по файловой системе!
         import os
         from PyQt5.QtWidgets import QTreeWidgetItem
         from PyQt5.QtGui import QIcon
         for element in os.listdir(startroot_path):
             path_info = startroot_path + "/" + element
             content = self.read_from_cfg(self.files_cfg)
-            level = "10"
-            for desc in content:
-                file, lvl = desc.split(" ")
-                if file == path_info:
-                    level = lvl
+            files = [r.split(" ")[0] for r in content]
+            sec_lvls = [r.split(" ")[1] for r in content]
+            if path_info in files:
+                level = sec_lvls[files.index(path_info)]
+            else:
+                level = "10"
+                content.append(path_info + " " + level)
+                self.write_to_cfg(content, self.files_cfg)
             parent_itm = TreeWidgetItem(tree, [os.path.basename(element)], path_info, level)
             if os.path.isdir(path_info):
                 self.load_tree_structure(path_info, parent_itm)
@@ -261,7 +263,7 @@ class Ui_MainWindow(object):
     def create_sec_lvl_handler(self):
         inp = self.securityLevelinput.text()
         self.securityLevelinput.clear()
-        if not inp.isnumeric():
+        if not inp.isnumeric() or int(inp) > 1000 or int(inp) < 0:
             print("create_sec_lvl_handler: Wrong input")
             return
         content = self.read_from_cfg(self.cfg_path)
@@ -288,12 +290,11 @@ class Ui_MainWindow(object):
         self.configure_selector()
 
     def rename_sec_lvl_handler(self):
-        #TODO: Подключить к конфиг-файлу
         old_name = self.securityLevelinput.text()
         self.securityLevelinput.clear()
         new_name = self.newNameOfSecurityLevel.text()
         self.newNameOfSecurityLevel.clear()
-        if not old_name.isnumeric() or not new_name.isnumeric():
+        if not old_name.isnumeric() or not new_name.isnumeric() or int(new_name) > 1000 or int(new_name) < 0:
             print("rename_sec_lvl_handler: Wrong input")
             return
         content = self.read_from_cfg(self.cfg_path)
