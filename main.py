@@ -1,9 +1,25 @@
+import os
+import random
+import shutil
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5 import *
+from PyQt5.QtCore import Qt
+colors = dict()
+colors["1000"] = QtGui.QBrush(Qt.red)
+colors["1"] = QtGui.QBrush(Qt.green)
+colors["10"] = QtGui.QBrush(Qt.black)
+class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
+    def __init__(self, tree, path, abs_path:str, color:str = "10"):
+        super().__init__(tree, path)
+        self.path = abs_path
+        self.setForeground(0, colors[color])
+    def get_abs_path(self):
+        return self.path
 
 class Ui_MainWindow(object):
-    root_path = "C:/Users/hello/PycharmProjects/cs4/root"
+    root_path = "C:/Users/hello/Desktop/root"
     cfg_path = "C:/Users/hello/PycharmProjects/cs4/config/cfg.txt"
+    files_cfg = "C:/Users/hello/PycharmProjects/cs4/config/files_cfg.txt"
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -98,6 +114,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.addWidget(self.label_6)
         self.securityLevelSelector = QtWidgets.QComboBox(self.verticalLayoutWidget_5)
         self.securityLevelSelector.setObjectName("securityLevelSelector")
+
         self.verticalLayout_6.addWidget(self.securityLevelSelector)
         self.setSecurityLevelButton = QtWidgets.QPushButton(self.verticalLayoutWidget_5)
         self.setSecurityLevelButton.setObjectName("setSecurityLevelButton")
@@ -116,6 +133,12 @@ class Ui_MainWindow(object):
         self.createSecurityLevelButton.clicked.connect(self.create_sec_lvl_handler)
         self.deleteSecurityLevelButton.clicked.connect(self.delete_sec_lvl_handler)
         self.renameSecurityLevelButton.clicked.connect(self.rename_sec_lvl_handler)
+        self.createFolderButton.clicked.connect(self.create_fldr_handler)
+        self.deleteFolderButton.clicked.connect(self.delete_fldr_hadler)
+        self.renameFolderButton.clicked.connect(self.rename_fldr_handler)
+        self.securityLevelSelector.addItems(self.read_from_cfg(self.cfg_path))
+        self.setSecurityLevelButton.clicked.connect(self.set_lvl)
+
 
 
         self.retranslateUi(MainWindow)
@@ -143,68 +166,151 @@ class Ui_MainWindow(object):
         self.load_tree_structure(self.root_path, self.treeWidget)
         self.treeWidget.setHeaderHidden(True)
 
+
+    def set_lvl(self):
+        level = self.securityLevelSelector.currentText()
+        if len(self.treeWidget.selectedItems()) == 0:
+            return
+        folder = self.treeWidget.selectedItems()[0].get_abs_path()
+        content = self.read_from_cfg(self.files_cfg)
+        for i in range(len(content)):
+            fldr, lvl = content[i].split(" ")
+            if fldr == folder:
+                content[i] = fldr + " " + level
+                break
+        self.write_to_cfg(content, self.files_cfg)
+        self.treeWidget.clear()
+        self.load_tree_structure(self.root_path, self.treeWidget)
+
+    def configure_selector(self):
+        self.securityLevelSelector.clear()
+        content = self.read_from_cfg(self.cfg_path)
+        self.securityLevelSelector.addItems(content)
+
+    def create_fldr_handler(self):
+        fldr = self.folderNameInput.text()
+        self.folderNameInput.clear()
+        if len(self.treeWidget.selectedItems()) == 0:
+            return
+        path = self.treeWidget.selectedItems()[0].get_abs_path() + "/" + fldr
+        print(path)
+        os.mkdir(path, 0o666)
+        content = self.read_from_cfg(self.files_cfg)
+        content.append(path + " 10")
+        self.write_to_cfg(content, self.files_cfg)
+        self.treeWidget.clear()
+        self.load_tree_structure(self.root_path,self.treeWidget)
+
+    def delete_fldr_hadler(self):
+        if len(self.treeWidget.selectedItems()) == 0:
+            return
+        path = self.treeWidget.selectedItems()[0].get_abs_path()
+        shutil.rmtree(path)
+        content = self.read_from_cfg(self.files_cfg)
+        for i in range(len(content)):
+            fldr, lvl = content[i].split(" ")
+            if fldr == path:
+                content.pop(i)
+                break
+        self.write_to_cfg(content, self.files_cfg)
+        self.treeWidget.clear()
+        self.load_tree_structure(self.root_path, self.treeWidget)
+
+
+    def rename_fldr_handler(self):
+        if len(self.treeWidget.selectedItems()) == 0:
+            return
+        old_name = self.treeWidget.selectedItems()[0].get_abs_path()
+        new_name = self.newNameOfFolder.text()
+        temp = old_name.split("/")
+        temp[-1] = new_name
+        new_path = "/".join(temp)
+        print("rename_fldr_handler: " + new_path)
+        self.newNameOfFolder.clear()
+        content = self.read_from_cfg(self.files_cfg)
+        for i in range(len(content)):
+            fldr, lvl = content[i].split(" ")
+            if fldr == old_name:
+                content[i] = new_name + " " + lvl
+                break
+        self.write_to_cfg(content, self.files_cfg)
+        shutil.move(old_name, new_path)
+        self.treeWidget.clear()
+        self.load_tree_structure(self.root_path, self.treeWidget)
+
+
     def load_tree_structure(self, startroot_path, tree):
+        #TODO: Сделать создание дерева по конфиг-файлу, а не по файловой системе!
         import os
         from PyQt5.QtWidgets import QTreeWidgetItem
         from PyQt5.QtGui import QIcon
         for element in os.listdir(startroot_path):
             path_info = startroot_path + "/" + element
-            parent_itm = QTreeWidgetItem(tree, [os.path.basename(element)])
+            content = self.read_from_cfg(self.files_cfg)
+            level = "10"
+            for desc in content:
+                file, lvl = desc.split(" ")
+                if file == path_info:
+                    level = lvl
+            parent_itm = TreeWidgetItem(tree, [os.path.basename(element)], path_info, level)
             if os.path.isdir(path_info):
                 self.load_tree_structure(path_info, parent_itm)
                 parent_itm.setIcon(0, QIcon('assets/folder.ico'))
             else:
                 parent_itm.setIcon(0, QIcon('assets/file.ico'))
-
     def create_sec_lvl_handler(self):
         inp = self.securityLevelinput.text()
         self.securityLevelinput.clear()
-        if not inp.isalpha():
+        if not inp.isnumeric():
             print("create_sec_lvl_handler: Wrong input")
             return
-        with open(self.cfg_path, "r+") as m:
-            content = m.readline().split("|")
-            if inp in content:
-                print("create_sec_lvl_handler: Security level already exists")
-                return
-            content.append(inp)
-        self.write_to_cfg(content)
-
+        content = self.read_from_cfg(self.cfg_path)
+        if inp in content:
+            print("create_sec_lvl_handler: Security level already exists")
+            return
+        content.append(inp)
+        self.write_to_cfg(content, self.cfg_path)
+        self.configure_selector()
+        #colors[inp] = QtGui.QBrush(QtGui.QColor(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+        #print(colors[inp])
     def delete_sec_lvl_handler(self):
         inp = self.securityLevelinput.text()
         self.securityLevelinput.clear()
-        if not inp.isalpha():
+        if not inp.isnumeric():
             print("delete_sec_lvl_handler: Wrong input")
             return
-        content = self.read_from_cfg()
+        content = self.read_from_cfg(self.cfg_path)
         if inp not in content:
             print("delete_sec_lvl_handler: Security level doesn't exist")
             return
         content.remove(inp)
-        self.write_to_cfg(content)
+        self.write_to_cfg(content, self.cfg_path)
+        self.configure_selector()
 
     def rename_sec_lvl_handler(self):
+        #TODO: Подключить к конфиг-файлу
         old_name = self.securityLevelinput.text()
         self.securityLevelinput.clear()
         new_name = self.newNameOfSecurityLevel.text()
         self.newNameOfSecurityLevel.clear()
-        if not old_name.isalpha() or not new_name.isalpha():
+        if not old_name.isnumeric() or not new_name.isnumeric():
             print("rename_sec_lvl_handler: Wrong input")
             return
-        content = self.read_from_cfg()
+        content = self.read_from_cfg(self.cfg_path)
         if old_name not in content or new_name in content:
             print("rename_sec_lvl_handler: Wrong input 2")
             return
         content[content.index(old_name)] = new_name
-        self.write_to_cfg(content)
-    def write_to_cfg(self, content):
-        with open(self.cfg_path, "w+") as m:
+        self.write_to_cfg(content, self.cfg_path)
+        self.configure_selector()
+    def write_to_cfg(self, content, path):
+        with open(path, "w+") as m:
             content_towrite = "|".join(content)
             print(f"Writing {content_towrite} to file")
             m.writelines(content_towrite)
 
-    def read_from_cfg(self):
-        with open(self.cfg_path, "r+") as m:
+    def read_from_cfg(self, path):
+        with open(path, "r+") as m:
             content = m.readline().split("|")
         return content
 if __name__ == '__main__':
