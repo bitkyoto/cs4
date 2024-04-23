@@ -14,16 +14,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTreeWidget" name="treeWidget">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>30</y>
-      <width>256</width>
-      <height>192</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
@@ -55,7 +45,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="deleteSecurityLevel">
+      <widget class="QPushButton" name="deleteSecurityLevelButton">
        <property name="text">
         <string>Удалить</string>
        </property>
@@ -204,7 +194,7 @@
       <x>340</x>
       <y>370</y>
       <width>181</width>
-      <height>101</height>
+      <height>116</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -243,6 +233,50 @@
         </size>
        </property>
       </spacer>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_6">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>30</y>
+      <width>261</width>
+      <height>471</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <item>
+      <widget class="QTreeWidget" name="treeWidget">
+       <column>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="showFolderButton">
+       <property name="text">
+        <string>Отобразить папки</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="copyButton">
+       <property name="text">
+        <string>Копировать</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QTreeWidget" name="copytreeWidget">
+       <column>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+       </column>
+      </widget>
      </item>
     </layout>
    </widget>

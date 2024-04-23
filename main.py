@@ -4,6 +4,8 @@ import shutil
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import *
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
+import os
 colors = dict()
 colors["1000"] = QtGui.QBrush(Qt.red)
 colors["1"] = QtGui.QBrush(Qt.green)
@@ -16,6 +18,7 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
     def get_abs_path(self):
         return self.path
 
+
 class Ui_MainWindow(object):
     root_path = "C:/Users/hello/Desktop/root"
     cfg_path = "C:/Users/hello/PycharmProjects/cs4/config/cfg.txt"
@@ -25,9 +28,6 @@ class Ui_MainWindow(object):
         MainWindow.resize(800, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.treeWidget = QtWidgets.QTreeWidget(self.centralwidget)
-        self.treeWidget.setGeometry(QtCore.QRect(30, 30, 256, 192))
-        self.treeWidget.setObjectName("treeWidget")
         self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(340, 30, 181, 121))
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
@@ -103,7 +103,7 @@ class Ui_MainWindow(object):
         spacerItem1 = QtWidgets.QSpacerItem(20, 29, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.verticalLayout_4.addItem(spacerItem1)
         self.verticalLayoutWidget_5 = QtWidgets.QWidget(self.centralwidget)
-        self.verticalLayoutWidget_5.setGeometry(QtCore.QRect(340, 370, 181, 101))
+        self.verticalLayoutWidget_5.setGeometry(QtCore.QRect(340, 370, 181, 116))
         self.verticalLayoutWidget_5.setObjectName("verticalLayoutWidget_5")
         self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_5)
         self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
@@ -114,13 +114,32 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.addWidget(self.label_6)
         self.securityLevelSelector = QtWidgets.QComboBox(self.verticalLayoutWidget_5)
         self.securityLevelSelector.setObjectName("securityLevelSelector")
-
         self.verticalLayout_6.addWidget(self.securityLevelSelector)
         self.setSecurityLevelButton = QtWidgets.QPushButton(self.verticalLayoutWidget_5)
         self.setSecurityLevelButton.setObjectName("setSecurityLevelButton")
         self.verticalLayout_6.addWidget(self.setSecurityLevelButton)
         spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.verticalLayout_6.addItem(spacerItem2)
+        self.verticalLayoutWidget_6 = QtWidgets.QWidget(self.centralwidget)
+        self.verticalLayoutWidget_6.setGeometry(QtCore.QRect(30, 30, 261, 471))
+        self.verticalLayoutWidget_6.setObjectName("verticalLayoutWidget_6")
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.verticalLayoutWidget_6)
+        self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.treeWidget = QtWidgets.QTreeWidget(self.verticalLayoutWidget_6)
+        self.treeWidget.setObjectName("treeWidget")
+        self.treeWidget.headerItem().setText(0, "1")
+        self.verticalLayout_5.addWidget(self.treeWidget)
+        self.showFolderButton = QtWidgets.QPushButton(self.verticalLayoutWidget_6)
+        self.showFolderButton.setObjectName("showFolderButton")
+        self.verticalLayout_5.addWidget(self.showFolderButton)
+        self.copyButton = QtWidgets.QPushButton(self.verticalLayoutWidget_6)
+        self.copyButton.setObjectName("copyButton")
+        self.verticalLayout_5.addWidget(self.copyButton)
+        self.copytreeWidget = QtWidgets.QTreeWidget(self.verticalLayoutWidget_6)
+        self.copytreeWidget.setObjectName("copytreeWidget")
+        self.copytreeWidget.headerItem().setText(0, "1")
+        self.verticalLayout_5.addWidget(self.copytreeWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
@@ -130,6 +149,9 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
         self.createSecurityLevelButton.clicked.connect(self.create_sec_lvl_handler)
         self.deleteSecurityLevelButton.clicked.connect(self.delete_sec_lvl_handler)
         self.renameSecurityLevelButton.clicked.connect(self.rename_sec_lvl_handler)
@@ -138,13 +160,8 @@ class Ui_MainWindow(object):
         self.renameFolderButton.clicked.connect(self.rename_fldr_handler)
         self.securityLevelSelector.addItems(self.read_from_cfg(self.cfg_path))
         self.setSecurityLevelButton.clicked.connect(self.set_lvl)
-
-
-
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-
+        self.showFolderButton.clicked.connect(self.show_available_folders)
+        self.copyButton.clicked.connect(self.copy_files_handler)
 
 
     def retranslateUi(self, MainWindow):
@@ -162,16 +179,135 @@ class Ui_MainWindow(object):
         self.renameFolderButton.setText(_translate("MainWindow", "Переименовать"))
         self.label_6.setText(_translate("MainWindow", "Задать уровень секретности"))
         self.setSecurityLevelButton.setText(_translate("MainWindow", "Задать"))
+        self.showFolderButton.setText(_translate("MainWindow", "Отобразить папки"))
+        self.copyButton.setText(_translate("MainWindow", "Копировать"))
 
         self.load_tree_structure(self.root_path, self.treeWidget)
+        self.load_copytree_structure(self.root_path, self.copytreeWidget)
         self.treeWidget.setHeaderHidden(True)
+        self.copytreeWidget.setHeaderHidden(True)
 
+    def show_available_folders(self):
+        self.copytreeWidget.clear()
+        self.load_copytree_structure(self.root_path,self.copytreeWidget)
+
+    def dump_copy_files(self, from_fldr, to_fldr):
+        content_ = self.read_from_cfg(self.files_cfg)
+        files_ = [r.split(" ")[0] for r in content_]
+        lvls_ = [r.split(" ")[1] for r in content_]
+        for element in os.listdir(from_fldr):
+            path_info = from_fldr + "/" + element
+            if os.path.isdir(path_info):
+                if path_info in files_:
+                    desc = to_fldr + " " + lvls_[files_.index(path_info)]
+                    content_.append(desc)
+                else:
+                    content_.append(path_info + " " + "1")
+                    content_.append(to_fldr + " " + "1")
+                self.write_to_cfg(content_, self.files_cfg)
+                self.dump_copy_files(path_info, to_fldr)
+
+
+
+
+        # for element in os.listdir(cur_path):
+        #     path_info = cur_path + "/" + element
+        #     content = self.read_from_cfg(self.files_cfg)
+        #     files = [r.split(" ")[0] for r in content]
+        #     sec_lvls = [r.split(" ")[1] for r in content]
+        #     if not os.path.isdir(path_info):
+        #         shutil.copy2(path_info,to_fldr)
+        #     else:
+        #         if path_info in files:
+        #             shutil.copytree(path_info,to_fldr)
+        #         else:
+        #             level = "1"
+        #             content.append(path_info + " " + level)
+        #             self.write_to_cfg(content, self.files_cfg)
+        #     if os.path.isdir(path_info):
+        #         self.load_tree_structure(path_info, parent_itm)
+
+
+    def copy_files_handler(self):
+        if len(self.treeWidget.selectedItems()) == 0:
+            return
+        if len(self.copytreeWidget.selectedItems()) == 0:
+            return
+
+        from_fldr = self.treeWidget.selectedItems()[0].get_abs_path()
+        to_fldr = self.copytreeWidget.selectedItems()[0].get_abs_path()
+
+        if not os.path.isdir(from_fldr):
+            print(f"copy_files_handler: Selected item is a file!")
+            return
+        if not os.path.isdir(to_fldr):
+            print(f"copy_files_handler: Selected item is a file!")
+            return
+
+        content_ = self.read_from_cfg(self.files_cfg)
+        files_ = [r.split(" ")[0] for r in content_]
+        lvls_ = [r.split(" ")[1] for r in content_]
+        from_fldr_lvl = lvls_[files_.index(from_fldr)]
+        to_fldr_lvl = lvls_[files_.index(to_fldr)]
+        print(f"from {from_fldr} lvl: {from_fldr_lvl}")
+
+        to_fldr += "/" + from_fldr.split("/")[-1]
+        print(f"to {to_fldr} lvl: {to_fldr_lvl}")
+        if from_fldr_lvl <= to_fldr_lvl:
+            shutil.copytree(from_fldr,to_fldr)
+            print("Here")
+            self.dump_copy_files(from_fldr, to_fldr)
+            self.treeWidget.clear()
+            self.copytreeWidget.clear()
+            self.load_tree_structure(self.root_path, self.treeWidget)
+            self.load_copytree_structure(self.root_path,self.copytreeWidget)
+
+
+    def load_copytree_structure(self, startroot_path, tree):
+        if len(self.treeWidget.selectedItems()) == 0:
+            return
+        from_fldr = self.treeWidget.selectedItems()[0].get_abs_path()
+        if from_fldr == self.root_path + "/root":
+            return
+        if not os.path.isdir(from_fldr):
+            print(f"load_copytree_structure: Selected item is a file!")
+            return
+        content_ = self.read_from_cfg(self.files_cfg)
+        files_ = [r.split(" ")[0] for r in content_]
+        lvls_ = [r.split(" ")[1] for r in content_]
+        from_fldr_lvl = lvls_[files_.index(from_fldr)]
+        for element in os.listdir(startroot_path):
+            path_info = startroot_path + "/" + element
+            if not os.path.isdir(path_info):
+                continue
+            content = self.read_from_cfg(self.files_cfg)
+            if path_info in files_:
+                level = lvls_[files_.index(path_info)]
+            else:
+                level = "1"
+                content.append(path_info + " " + level)
+                self.write_to_cfg(content, self.files_cfg)
+            if path_info == self.root_path + "/root":
+                parent_itm = TreeWidgetItem(tree, [os.path.basename(element)], path_info, "10")
+            else:
+                if level >= from_fldr_lvl:
+                    parent_itm = TreeWidgetItem(tree, [os.path.basename(element)], path_info, "1")
+                else:
+                    parent_itm = TreeWidgetItem(tree, [os.path.basename(element)], path_info,"1000")
+            if os.path.isdir(path_info):
+                self.load_copytree_structure(path_info, parent_itm)
+                parent_itm.setIcon(0, QIcon('assets/folder.ico'))
+            else:
+                parent_itm.setIcon(0, QIcon('assets/file.ico'))
 
     def set_lvl(self):
         level = self.securityLevelSelector.currentText()
         if len(self.treeWidget.selectedItems()) == 0:
             return
         folder = self.treeWidget.selectedItems()[0].get_abs_path()
+        if not os.path.isdir(folder):
+            print(f"set_lvl: Selected item is a file!")
+            return
         content = self.read_from_cfg(self.files_cfg)
         for i in range(len(content)):
             fldr, lvl = content[i].split(" ")
@@ -180,6 +316,7 @@ class Ui_MainWindow(object):
                 break
         self.write_to_cfg(content, self.files_cfg)
         self.treeWidget.clear()
+        self.copytreeWidget.clear()
         self.load_tree_structure(self.root_path, self.treeWidget)
 
     def configure_selector(self):
@@ -191,20 +328,28 @@ class Ui_MainWindow(object):
         fldr = self.folderNameInput.text()
         self.folderNameInput.clear()
         if len(self.treeWidget.selectedItems()) == 0:
+            print(f"create_fldr_handler: No element is selected!")
+            return
+        if not os.path.isdir(self.treeWidget.selectedItems()[0].get_abs_path()):
+            print(f"create_fldr_handler: Selected item is a file!")
             return
         path = self.treeWidget.selectedItems()[0].get_abs_path() + "/" + fldr
         print(path)
         os.mkdir(path, 0o666)
         content = self.read_from_cfg(self.files_cfg)
-        content.append(path + " 10")
+        content.append(path + " 1")
         self.write_to_cfg(content, self.files_cfg)
         self.treeWidget.clear()
+        self.copytreeWidget.clear()
         self.load_tree_structure(self.root_path,self.treeWidget)
 
     def delete_fldr_hadler(self):
         if len(self.treeWidget.selectedItems()) == 0:
             return
         path = self.treeWidget.selectedItems()[0].get_abs_path()
+        if not os.path.isdir(path):
+            print(f"delete_fldr_handler: Selected item is a file!")
+            return
         shutil.rmtree(path)
         content = self.read_from_cfg(self.files_cfg)
         for i in range(len(content)):
@@ -214,6 +359,7 @@ class Ui_MainWindow(object):
                 break
         self.write_to_cfg(content, self.files_cfg)
         self.treeWidget.clear()
+        self.copytreeWidget.clear()
         self.load_tree_structure(self.root_path, self.treeWidget)
 
 
@@ -222,6 +368,9 @@ class Ui_MainWindow(object):
             return
         old_name = self.treeWidget.selectedItems()[0].get_abs_path()
         new_name = self.newNameOfFolder.text()
+        if not os.path.isdir(old_name):
+            print(f"delete_fldr_handler: Selected item is a file!")
+            return
         temp = old_name.split("/")
         temp[-1] = new_name
         new_path = "/".join(temp)
@@ -236,30 +385,33 @@ class Ui_MainWindow(object):
         self.write_to_cfg(content, self.files_cfg)
         shutil.move(old_name, new_path)
         self.treeWidget.clear()
+        self.copytreeWidget.clear()
         self.load_tree_structure(self.root_path, self.treeWidget)
 
 
     def load_tree_structure(self, startroot_path, tree):
-        import os
-        from PyQt5.QtWidgets import QTreeWidgetItem
-        from PyQt5.QtGui import QIcon
+
         for element in os.listdir(startroot_path):
             path_info = startroot_path + "/" + element
-            content = self.read_from_cfg(self.files_cfg)
-            files = [r.split(" ")[0] for r in content]
-            sec_lvls = [r.split(" ")[1] for r in content]
-            if path_info in files:
-                level = sec_lvls[files.index(path_info)]
-            else:
-                level = "10"
-                content.append(path_info + " " + level)
-                self.write_to_cfg(content, self.files_cfg)
-            parent_itm = TreeWidgetItem(tree, [os.path.basename(element)], path_info, level)
-            if os.path.isdir(path_info):
-                self.load_tree_structure(path_info, parent_itm)
-                parent_itm.setIcon(0, QIcon('assets/folder.ico'))
-            else:
+            if not os.path.isdir(path_info):
+                parent_itm = TreeWidgetItem(tree, [os.path.basename(element)], path_info)
                 parent_itm.setIcon(0, QIcon('assets/file.ico'))
+            else:
+                content = self.read_from_cfg(self.files_cfg)
+                files = [r.split(" ")[0] for r in content]
+                sec_lvls = [r.split(" ")[1] for r in content]
+                if path_info in files:
+                    level = sec_lvls[files.index(path_info)]
+                else:
+                    level = "1"
+                    content.append(path_info + " " + level)
+                    self.write_to_cfg(content, self.files_cfg)
+                parent_itm = TreeWidgetItem(tree, [os.path.basename(element) + " " + level], path_info)
+                if os.path.isdir(path_info):
+                    self.load_tree_structure(path_info, parent_itm)
+                    parent_itm.setIcon(0, QIcon('assets/folder.ico'))
+                else:
+                    parent_itm.setIcon(0, QIcon('assets/file.ico'))
     def create_sec_lvl_handler(self):
         inp = self.securityLevelinput.text()
         self.securityLevelinput.clear()
