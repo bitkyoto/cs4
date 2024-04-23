@@ -243,7 +243,6 @@ class Ui_MainWindow(object):
         if not os.path.isdir(to_fldr):
             print(f"copy_files_handler: Selected item is a file!")
             return
-
         content_ = self.read_from_cfg(self.files_cfg)
         files_ = [r.split(" ")[0] for r in content_]
         lvls_ = [r.split(" ")[1] for r in content_]
