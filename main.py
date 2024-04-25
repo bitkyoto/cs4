@@ -251,9 +251,12 @@ class Ui_MainWindow(object):
         print(f"from {from_fldr} lvl: {from_fldr_lvl}")
 
         to_fldr += "/" + from_fldr.split("/")[-1]
-        print(f"to {to_fldr} lvl: {to_fldr_lvl}")
+
+        self.write_to_cfg(content_, self.files_cfg)
         if from_fldr_lvl <= to_fldr_lvl:
             shutil.copytree(from_fldr,to_fldr)
+            print(f"to {to_fldr} lvl: {to_fldr_lvl}")
+            content_.append(to_fldr + " " + to_fldr_lvl)
             print("Here")
             self.dump_copy_files(from_fldr, to_fldr)
             self.treeWidget.clear()
