@@ -382,7 +382,7 @@ class Ui_MainWindow(object):
         for i in range(len(content)):
             fldr, lvl = content[i].split(" ")
             if fldr == old_name:
-                content[i] = new_name + " " + lvl
+                content[i] = new_path + " " + lvl
                 break
         self.write_to_cfg(content, self.files_cfg)
         shutil.move(old_name, new_path)
@@ -417,7 +417,7 @@ class Ui_MainWindow(object):
     def create_sec_lvl_handler(self):
         inp = self.securityLevelinput.text()
         self.securityLevelinput.clear()
-        if not inp.isnumeric() or int(inp) > 1000 or int(inp) < 0:
+        if not inp.isnumeric() or int(inp) >= 1000 or int(inp) <= 1:
             print("create_sec_lvl_handler: Wrong input")
             return
         content = self.read_from_cfg(self.cfg_path)
@@ -441,7 +441,17 @@ class Ui_MainWindow(object):
             return
         content.remove(inp)
         self.write_to_cfg(content, self.cfg_path)
+        content_2 = self.read_from_cfg(self.files_cfg)
+        for i in range(len(content_2)):
+            file, lvl = content_2[i].split(" ")
+            print(file, lvl)
+            if lvl == inp:
+                content_2[i] = file + " " + "1"
+        self.write_to_cfg(content_2,self.files_cfg)
         self.configure_selector()
+        self.treeWidget.clear()
+        self.load_tree_structure(self.root_path, self.treeWidget)
+
 
     def rename_sec_lvl_handler(self):
         old_name = self.securityLevelinput.text()
@@ -456,8 +466,18 @@ class Ui_MainWindow(object):
             print("rename_sec_lvl_handler: Wrong input 2")
             return
         content[content.index(old_name)] = new_name
+        content_2 = self.read_from_cfg(self.files_cfg)
+        for i in range(len(content_2)):
+            file, lvl = content_2[i].split(" ")
+            print(file, lvl, f"##########################{new_name}")
+            if lvl == old_name:
+                content_2[i] = file + " " + new_name
         self.write_to_cfg(content, self.cfg_path)
+        self.write_to_cfg(content_2, self.files_cfg)
         self.configure_selector()
+        self.treeWidget.clear()
+        self.load_tree_structure(self.root_path, self.treeWidget)
+
     def write_to_cfg(self, content, path):
         with open(path, "w+") as m:
             content_towrite = "|".join(content)
