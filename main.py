@@ -20,9 +20,9 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
 
 
 class Ui_MainWindow(object):
-    root_path = "C:/Users/Наталья/Desktop/root"
-    cfg_path = "C:/Users/Наталья/PycharmProjects/cs4real/config/cfg.txt"
-    files_cfg = "C:/Users/Наталья/PycharmProjects/cs4/configreal/files_cfg.txt"
+    root_path = "C:/Users/hello/Desktop/root"
+    cfg_path = "C:/Users/hello/PycharmProjects/cs4/config/cfg.txt"
+    files_cfg = "C:/Users/hello/PycharmProjects/cs4/config/files_cfg.txt"
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -251,11 +251,12 @@ class Ui_MainWindow(object):
         print(f"from {from_fldr} lvl: {from_fldr_lvl}")
 
         to_fldr += "/" + from_fldr.split("/")[-1]
-        content_.append(to_fldr)
-        self.write_to_cfg(content_,self.files_cfg)
-        print(f"to {to_fldr} lvl: {to_fldr_lvl}")
+
+        self.write_to_cfg(content_, self.files_cfg)
         if from_fldr_lvl <= to_fldr_lvl:
             shutil.copytree(from_fldr,to_fldr)
+            print(f"to {to_fldr} lvl: {to_fldr_lvl}")
+            content_.append(to_fldr + " " + to_fldr_lvl)
             print("Here")
             self.dump_copy_files(from_fldr, to_fldr)
             self.treeWidget.clear()
