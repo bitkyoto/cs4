@@ -19,12 +19,12 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
         return self.path
 
 class Ui_MainWindow(object):
-    root_path = "C:/Users/hello/Desktop/root"
-    cfg_path = "C:/Users/hello/PycharmProjects/cs4/config/cfg.txt"
-    files_cfg = "C:/Users/hello/PycharmProjects/cs4/config/files_cfg.txt"
+    root_path = "C:/Users/Наталья/Desktop/root"
+    cfg_path = "C:/Users/Наталья/PycharmProjects/cs444/config/cfg.txt"
+    files_cfg = "C:/Users/Наталья/PycharmProjects/cs444/config/files_cfg.txt"
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(1200, 1000)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -171,7 +171,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label.setText(_translate("MainWindow", "Управление уровнями секретности"))
+        self.label.setText(_translate("MainWindow", "Security lvl management"))
         self.createSecurityLevelButton.setText(_translate("MainWindow", "Создать "))
         self.deleteSecurityLevelButton.setText(_translate("MainWindow", "Удалить"))
         self.label_2.setText(_translate("MainWindow", "Новое название"))
@@ -181,7 +181,7 @@ class Ui_MainWindow(object):
         self.deleteFolderButton.setText(_translate("MainWindow", "Удалить"))
         self.label_4.setText(_translate("MainWindow", "Новое название"))
         self.renameFolderButton.setText(_translate("MainWindow", "Переименовать"))
-        self.label_6.setText(_translate("MainWindow", "Задать уровень секретности"))
+        self.label_6.setText(_translate("MainWindow", "Set security level"))
         self.setSecurityLevelButton.setText(_translate("MainWindow", "Задать"))
         self.showFolderButton.setText(_translate("MainWindow", "Отобразить папки"))
         self.copyButton.setText(_translate("MainWindow", "Копировать"))
@@ -466,9 +466,17 @@ class Ui_MainWindow(object):
             print("rename_sec_lvl_handler: Wrong input")
             return
         content = self.read_from_cfg(self.cfg_path)
-        if old_name not in [r.split(" ")[0] for r in content] or new_name in [r.split(" ")[0] for r in content]:
+        if old_name not in [r.split(" ")[0] for r in content]:
             print("rename_sec_lvl_handler: Wrong input 2")
             return
+        if new_lvl in [r.split(" ")[1] for r in content]:
+            print("rename_sec_lvl_handler: Wrong input 3")
+            return
+        temp = [r.split(" ")[0] for r in content]
+        temp.remove(old_name)
+        if new_name in temp:
+            return
+        print(new_name + " " + new_lvl)
         for i in range(len(content)):
             if content[i].split(" ")[0] == old_name:
                 old_lvl = content[i].split(" ")[1]
@@ -497,6 +505,7 @@ class Ui_MainWindow(object):
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyle("fusion")
     main_window = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(main_window)
