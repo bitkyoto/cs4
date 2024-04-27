@@ -1,11 +1,8 @@
 import os
-import random
 import shutil
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5 import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-import os
 colors = dict()
 colors["1000"] = QtGui.QBrush(Qt.red)
 colors["1"] = QtGui.QBrush(Qt.green)
@@ -19,9 +16,9 @@ class TreeWidgetItem(QtWidgets.QTreeWidgetItem):
         return self.path
 
 class Ui_MainWindow(object):
-    root_path = "C:/Users/Наталья/Desktop/root"
-    cfg_path = "C:/Users/Наталья/PycharmProjects/cs444/config/cfg.txt"
-    files_cfg = "C:/Users/Наталья/PycharmProjects/cs444/config/files_cfg.txt"
+    root_path = "C:/Users/hello/Desktop/root"
+    cfg_path = "C:/Users/hello/PycharmProjects/cs4/config/cfg.txt"
+    files_cfg = "C:/Users/hello/PycharmProjects/cs4/config/files_cfg.txt"
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1200, 1000)
@@ -428,11 +425,6 @@ class Ui_MainWindow(object):
     def delete_sec_lvl_handler(self):
         name = self.securityNameInput.text()
         self.securityNameInput.clear()
-        # inp = self.securityLevelinput.text()
-        # self.securityLevelinput.clear()
-        # if not inp.isnumeric():
-        #     print("delete_sec_lvl_handler: Wrong input")
-        #     return
         content = self.read_from_cfg(self.cfg_path)
         names = [r.split(" ")[0] for r in content]
         if name not in names:
@@ -505,7 +497,6 @@ class Ui_MainWindow(object):
 if __name__ == '__main__':
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    app.setStyle("fusion")
     main_window = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(main_window)
